@@ -1,0 +1,48 @@
+package com.example.arwashamaly_networkproject.Activities;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
+
+import com.example.arwashamaly_networkproject.Utility.BaseActivity;
+import com.example.arwashamaly_networkproject.databinding.ActivityChangePasswordBinding;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
+
+public class ChangePasswordActivity extends BaseActivity {
+    ActivityChangePasswordBinding binding;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = ActivityChangePasswordBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        binding.btnSave2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //updatePassword();
+            }
+        });
+    }
+
+    private void updatePassword(String email, String oldPassword, String newPassword) {
+        AuthCredential credential = EmailAuthProvider.getCredential("", "");
+        user.reauthenticate(credential).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    user.updatePassword("");
+                } else {
+                    Toast.makeText(ChangePasswordActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        user.reload();
+    }
+
+}

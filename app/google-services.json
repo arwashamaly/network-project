@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "868394482034",
+    "project_id": "network-project-e147f",
+    "storage_bucket": "network-project-e147f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:868394482034:android:efdacc604fe140c562c5eb",
+        "android_client_info": {
+          "package_name": "com.example.arwashamaly_networkproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "868394482034-0ejr068aqt496gdcs88u9e39cf7i765i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRuTRjahY4wO4RjuHB_pOqkG5T6bgwht0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "868394482034-0ejr068aqt496gdcs88u9e39cf7i765i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
