@@ -1,17 +1,13 @@
 package com.example.arwashamaly_networkproject.Adapters;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -21,8 +17,6 @@ import com.example.arwashamaly_networkproject.Utility.Perfume;
 import com.example.arwashamaly_networkproject.databinding.ItemPerfumeBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -31,7 +25,6 @@ public class PerfumeAdapter extends RecyclerView.Adapter<PerfumeAdapter.perfumeH
     Context context;
     PerfumeListener listener;
     List<Perfume> favorite;
-  //  FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
     FirebaseUser user =FirebaseAuth.getInstance().getCurrentUser();
 
     public PerfumeAdapter(List<Perfume> perfumeList, Context context, PerfumeListener listener) {
@@ -96,13 +89,9 @@ public class PerfumeAdapter extends RecyclerView.Adapter<PerfumeAdapter.perfumeH
                     if (perfume.isFavorite()) {
                         perfume.setFavorite(false);
                         holder.imgFavorite.setImageResource(R.drawable.ic_un_favorite);
-//                         firebaseFirestore.collection("Perfumes").document(perfume.getId())
-//                                 .set(perfume);
                     } else {
                         perfume.setFavorite(true);
                         holder.imgFavorite.setImageResource(R.drawable.ic_favorite);
-//                        firebaseFirestore.collection("Perfumes").document(perfume.getId())
-//                                .set(perfume);
                     }
                 }
                 listener.favoriteClick(pos);

@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.example.arwashamaly_networkproject.Adapters.PerfumeAdapter;
 import com.example.arwashamaly_networkproject.Listeneres.PerfumeListener;

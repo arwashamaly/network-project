@@ -3,7 +3,6 @@ package com.example.arwashamaly_networkproject.Activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -17,6 +16,7 @@ import com.example.arwashamaly_networkproject.Utility.BaseActivity;
 import com.example.arwashamaly_networkproject.Utility.User;
 import com.example.arwashamaly_networkproject.databinding.ActivityEditProfileBinding;
 import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.storage.StorageReference;
@@ -61,62 +61,46 @@ public class EditProfileActivity extends BaseActivity {
                 al1.launch("image/*");
             }
         });
-//        binding.btnSave.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                String name = binding.etName.getText().toString();
-//                String city = binding.spCountry.getSelectedItem().toString();
-//                String gender = "";
-//                String uriString = uri.toString();
-//                if (binding.rbFemale.isChecked()) {
-//                    gender = "Female";
-//                } else if (binding.rbMale.isChecked()) {
-//                    gender = "Male";
-//                }
-//                if (!name.isEmpty() && !city.isEmpty() && !gender.isEmpty() &&
-//                        !uriString.isEmpty()) {
-//                    User user = new User(name, city, gender, uriString);
-//                    updateUserInfo(user);
-//                    finish();
-//                }
-//            }
-//        });
 
         binding.btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String name = binding.etName.getText().toString();
                 String city = binding.spCountry.getSelectedItem().toString();
-                Toast.makeText(EditProfileActivity.this, "" + uri, Toast.LENGTH_SHORT).show();
                 if (uri != null) {
                     StorageReference reference = firebaseStorage.getReference("users/" + user.getUid() + "/" + uri.getLastPathSegment());
                     UploadTask uploadTask = reference.putFile(uri);
                     Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                         @Override
                         public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                            String gender = "";
-                            if (binding.rbFemale.isChecked()) {
-                                gender = "Female";
-                            } else if (binding.rbMale.isChecked()) {
-                                gender = "Male";
-                            }
-
-                            Toast.makeText(EditProfileActivity.this, "before", Toast.LENGTH_SHORT).show();
-
-                            String uriString = reference.getDownloadUrl().getResult().toString();
-
-                            Toast.makeText(EditProfileActivity.this, "AFTER", Toast.LENGTH_SHORT).show();
-
-                            Toast.makeText(EditProfileActivity.this, "" + uriString, Toast.LENGTH_SHORT).show();
-
-                            Log.d("uriString", uriString);
-                            if (!name.isEmpty() && !city.isEmpty() && !gender.isEmpty() &&
-                                    !uriString.isEmpty()) {
-                                User user = new User(name, city, gender, uriString);
-                                updateUserInfo(user);
-                                finish();
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
                             }
                             return reference.getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            if (task.isSuccessful()) {
+                                String gender = "";
+                                if (binding.rbFemale.isChecked()) {
+                                    gender = "Female";
+                                } else if (binding.rbMale.isChecked()) {
+                                    gender = "Male";
+                                }
+
+                                String uriString = task.getResult().toString();
+
+                                if (!name.isEmpty() && !city.isEmpty() && !gender.isEmpty() &&
+                                        !uriString.isEmpty()) {
+                                    User user = new User(name, city, gender, uriString);
+                                    updateUserInfo(user);
+                                    finish();
+                                }
+
+                            } else {
+                                Toast.makeText(EditProfileActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
                 }

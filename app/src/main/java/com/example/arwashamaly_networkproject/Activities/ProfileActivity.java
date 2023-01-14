@@ -5,11 +5,8 @@ import androidx.appcompat.app.AlertDialog;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.arwashamaly_networkproject.Utility.BaseActivity;
@@ -70,6 +67,7 @@ public class ProfileActivity extends BaseActivity {
                         .create().show();
             }
         });
+
     }
 
     private void getUserInfo() {
