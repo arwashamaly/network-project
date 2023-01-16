@@ -29,7 +29,6 @@ public class ChangePasswordActivity extends BaseActivity {
                 String newPass = binding.etNewPass.getText().toString();
                 if (!oldPass.isEmpty() && !newPass.isEmpty()) {
                     updatePassword(oldPass, newPass);
-                    finish();
                 }
             }
         });
@@ -43,6 +42,7 @@ public class ChangePasswordActivity extends BaseActivity {
                 if (task.isSuccessful()) {
                     user.updatePassword(newPassword);
                     Toast.makeText(ChangePasswordActivity.this, "Change password successfully", Toast.LENGTH_SHORT).show();
+                    finish();
                 } else {
                     Toast.makeText(ChangePasswordActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                 }

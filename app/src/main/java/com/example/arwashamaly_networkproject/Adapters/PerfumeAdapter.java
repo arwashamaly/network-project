@@ -24,20 +24,12 @@ public class PerfumeAdapter extends RecyclerView.Adapter<PerfumeAdapter.perfumeH
     List<Perfume> perfumeList;
     Context context;
     PerfumeListener listener;
-    List<Perfume> favorite;
     FirebaseUser user =FirebaseAuth.getInstance().getCurrentUser();
 
     public PerfumeAdapter(List<Perfume> perfumeList, Context context, PerfumeListener listener) {
         this.perfumeList = perfumeList;
         this.context = context;
         this.listener = listener;
-    }
-
-    public PerfumeAdapter(List<Perfume> perfumeList, Context context, PerfumeListener listener, List<Perfume> favorite) {
-        this.perfumeList = perfumeList;
-        this.context = context;
-        this.listener = listener;
-        this.favorite = favorite;
     }
 
     @NonNull
@@ -56,22 +48,11 @@ public class PerfumeAdapter extends RecyclerView.Adapter<PerfumeAdapter.perfumeH
         holder.tvName.setText(perfume.getName());
         holder.tvPrice.setText(perfume.getPrice()+" $");
 
-        if(favorite!=null){
-            for (int i = 0; i < favorite.size(); i++) {
-                if (favorite.get(i).getId().equals(perfume.getId())){
-                    holder.imgFavorite.setImageResource(R.drawable.ic_favorite);
-                }else{
-                    holder.imgFavorite.setImageResource(R.drawable.ic_un_favorite);
-                }
-            }
-        }else{
-            if (perfume.isFavorite()){
-                holder.imgFavorite.setImageResource(R.drawable.ic_favorite);
-            }else {
-                holder.imgFavorite.setImageResource(R.drawable.ic_un_favorite);
-            }
+        if (perfume.isFavorite()){
+            holder.imgFavorite.setImageResource(R.drawable.ic_favorite);
+        }else {
+            holder.imgFavorite.setImageResource(R.drawable.ic_un_favorite);
         }
-
 
         Glide.with(context).load(perfume.getPhoto()).into(holder.imgPerfume);
 

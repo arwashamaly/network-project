@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.SearchView;
+import android.widget.Toast;
 
 import com.example.arwashamaly_networkproject.Adapters.PerfumeAdapter;
 import com.example.arwashamaly_networkproject.Listeneres.PerfumeListener;
@@ -37,6 +39,26 @@ public class HomeActivity extends BaseActivity {
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                if (s.isEmpty())
+                    getAllProducts();
+                else
+                    getAllProductsName(s);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                if (s.isEmpty())
+                    getAllProducts();
+                else
+                    getAllProductsName(s);
+                return false;
+            }
+        });
+
         setSupportActionBar(binding.toolbar2);
         setTitle("Marilyn perfumes");
         getAllProducts();
@@ -62,68 +84,52 @@ public class HomeActivity extends BaseActivity {
                                     2, RecyclerView.VERTICAL, false));
                             binding.progressBar.setVisibility(View.GONE);
 
-                            DocumentReference document = firebaseFirestore.collection("Users").document(user.getUid());
-                            document.collection("FavoritePerfumes").get().addOnSuccessListener(HomeActivity.this, new OnSuccessListener<QuerySnapshot>() {
+                            PerfumeAdapter adapter = new PerfumeAdapter(perfumeList, HomeActivity.this, new PerfumeListener() {
                                 @Override
-                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                    List<Perfume> favorite = new ArrayList<>();
-                                    if (!queryDocumentSnapshots.isEmpty()) {
-                                        List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
-                                        for (DocumentSnapshot d : list) {
-                                            Perfume perfume = d.toObject(Perfume.class);
-                                            perfume.setId(d.getId());
-                                            favorite.add(perfume);
+                                public void itemClick(int position) {
+                                    Perfume perfume = perfumeList.get(position);
+                                    Intent intent = new Intent(getBaseContext(), DetailsActivity.class);
+                                    intent.putExtra("photo", perfume.getPhoto());
+                                    intent.putExtra("name", perfume.getName());
+                                    intent.putExtra("price", perfume.getPrice());
+                                    intent.putExtra("details", perfume.getDetails());
+                                    startActivity(intent);
+                                }
+
+                                @Override
+                                public void favoriteClick(int position) {
+                                    if (user == null) {
+                                        new AlertDialog.Builder(HomeActivity.this)
+                                                .setTitle("Sign in")
+                                                .setMessage("You must log in first, in order to place the product in the preferences !")
+                                                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                                                    }
+                                                })
+                                                .setPositiveButton("sign in", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                                        startActivity(new Intent(getBaseContext(), MainActivity.class));
+                                                        finish();
+                                                    }
+                                                })
+                                                .create().show();
+                                    } else {
+                                        DocumentReference document = firebaseFirestore.collection("Users").document(user.getUid());
+                                        if (perfumeList.get(position).isFavorite()) {
+                                            document.collection("FavoritePerfumes")
+                                                    .document(perfumeList.get(position).getId())
+                                                    .set(perfumeList.get(position));
+                                        } else {
+                                            document.collection("FavoritePerfumes")
+                                                    .document(perfumeList.get(position).getId()).delete();
                                         }
                                     }
-                                    PerfumeAdapter adapter = new PerfumeAdapter(perfumeList,HomeActivity.this, new PerfumeListener() {
-                                        @Override
-                                        public void itemClick(int position) {
-                                            Perfume perfume = perfumeList.get(position);
-                                            Intent intent = new Intent(getBaseContext(), DetailsActivity.class);
-                                            intent.putExtra("photo", perfume.getPhoto());
-                                            intent.putExtra("name", perfume.getName());
-                                            intent.putExtra("price", perfume.getPrice());
-                                            intent.putExtra("details", perfume.getDetails());
-                                            startActivity(intent);
-                                        }
-
-                                        @Override
-                                        public void favoriteClick(int position) {
-                                            if (user == null) {
-                                                new AlertDialog.Builder(HomeActivity.this)
-                                                        .setTitle("Sign in")
-                                                        .setMessage("You must log in first, in order to place the product in the preferences !")
-                                                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                                                            @Override
-                                                            public void onClick(DialogInterface dialogInterface, int i) {
-
-                                                            }
-                                                        })
-                                                        .setPositiveButton("sign in", new DialogInterface.OnClickListener() {
-                                                            @Override
-                                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                                startActivity(new Intent(getBaseContext(), MainActivity.class));
-                                                                finish();
-                                                            }
-                                                        })
-                                                        .create().show();
-                                            } else {
-                                                DocumentReference document = firebaseFirestore.collection("Users").document(user.getUid());
-                                                if (perfumeList.get(position).isFavorite()) {
-                                                    document.collection("FavoritePerfumes")
-                                                            .document(perfumeList.get(position).getId())
-                                                            .set(perfumeList.get(position));
-                                                } else {
-                                                    document.collection("FavoritePerfumes")
-                                                            .document(perfumeList.get(position).getId()).delete();
-                                                }
-                                            }
-                                        }
-                                    },favorite );
-                                    binding.rc.setAdapter(adapter);
                                 }
                             });
-
+                            binding.rc.setAdapter(adapter);
                         }
                     }
                 });
@@ -138,6 +144,80 @@ public class HomeActivity extends BaseActivity {
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (!queryDocumentSnapshots.isEmpty()) {
 
+                            List<Perfume> perfumeList = new ArrayList<>();
+                            List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+                            for (DocumentSnapshot d : list) {
+                                Perfume perfume = d.toObject(Perfume.class);
+                                perfume.setId(d.getId());
+                                perfumeList.add(perfume);
+                            }
+
+                            binding.rc.setLayoutManager(new GridLayoutManager(HomeActivity.this,
+                                    2, RecyclerView.VERTICAL, false));
+                            binding.progressBar.setVisibility(View.GONE);
+
+                            PerfumeAdapter adapter = new PerfumeAdapter(perfumeList, HomeActivity.this, new PerfumeListener() {
+                                @Override
+                                public void itemClick(int position) {
+                                    Perfume perfume = perfumeList.get(position);
+                                    Intent intent = new Intent(getBaseContext(), DetailsActivity.class);
+                                    intent.putExtra("photo", perfume.getPhoto());
+                                    intent.putExtra("name", perfume.getName());
+                                    intent.putExtra("price", perfume.getPrice());
+                                    intent.putExtra("details", perfume.getDetails());
+                                    startActivity(intent);
+                                }
+
+                                @Override
+                                public void favoriteClick(int position) {
+                                    if (user == null) {
+                                        new AlertDialog.Builder(HomeActivity.this)
+                                                .setTitle("Sign in")
+                                                .setMessage("You must log in first, in order to place the product in the preferences !")
+                                                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                                                    }
+                                                })
+                                                .setPositiveButton("sign in", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                                        startActivity(new Intent(getBaseContext(), MainActivity.class));
+                                                        finish();
+                                                    }
+                                                })
+                                                .create().show();
+                                    } else {
+                                        DocumentReference document = firebaseFirestore.collection("Users").document(user.getUid());
+                                        if (perfumeList.get(position).isFavorite()) {
+                                            document.collection("FavoritePerfumes")
+                                                    .document(perfumeList.get(position).getId())
+                                                    .set(perfumeList.get(position));
+                                        } else {
+                                            document.collection("FavoritePerfumes")
+                                                    .document(perfumeList.get(position).getId()).delete();
+                                        }
+                                    }
+                                }
+                            });
+                            binding.rc.setAdapter(adapter);
+                        }
+                    }
+                });
+    }
+
+    private void getAllProductsName(String name) {
+        if (name.length() > 0)
+            name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+
+        firebaseFirestore.collection("Perfumes")
+                .whereEqualTo("name", name)
+                .get()
+                .addOnSuccessListener(HomeActivity.this, new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if (!queryDocumentSnapshots.isEmpty()) {
                             List<Perfume> perfumeList = new ArrayList<>();
                             List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
                             for (DocumentSnapshot d : list) {
